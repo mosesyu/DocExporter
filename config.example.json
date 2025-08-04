@@ -1,0 +1,16 @@
+{
+    "confluence": {
+        "base_url": "https://your-confluence-instance.com",
+        "space_key": "YOUR_SPACE_KEY",
+        "page_title": "Your Page Title",
+        "export_dir": "confluence_exports",
+        "max_depth": 15,
+        "personal_access_token": "YOUR_CONFLUENCE_PERSONAL_ACCESS_TOKEN"
+    },
+    "github": {
+        "repo_url": "git@github.com:YourOrg/your-repo.git",
+        "folder_path": "docs",
+        "destination": "./service_docs",
+        "temp_dir": "./temp"
+    }
+}

@@ -1,3 +1,11 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.log
+
 # Ignore confluence_exports and service_docs folders
 confluence_exports/
 service_docs/

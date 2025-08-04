@@ -3,15 +3,15 @@ import os
 from markdownify import markdownify as md
 from config_utils import load_config
 
-# Replace with your actual values
-PERSONAL_ACCESS_TOKEN = os.getenv("CONFLUENCE_PERSONAL_ACCESS_TOKEN")  # Use https://confluence.sage.com/plugins/personalaccesstokens/usertokens.action to create a personal access token
-
-if not PERSONAL_ACCESS_TOKEN:
-    raise ValueError("CONFLUENCE_PERSONAL_ACCESS_TOKEN environment variable is required")
-
 # Load configuration from JSON file
 config = load_config()
 confluence_config = config['confluence']
+
+# Get personal access token from config
+PERSONAL_ACCESS_TOKEN = confluence_config.get('personal_access_token')
+
+if not PERSONAL_ACCESS_TOKEN or PERSONAL_ACCESS_TOKEN == "YOUR_TOKEN_HERE":
+    raise ValueError("Please set your personal_access_token in the config.json file. Use https://confluence.sage.com/plugins/personalaccesstokens/usertokens.action to create a personal access token")
 
 BASE_URL = confluence_config['base_url']
 SPACE_KEY = confluence_config['space_key']
@@ -64,6 +64,7 @@ def get_all_nested_pages(parent_id, all_pages=None, max_depth=MAX_NESTING_DEPTH,
     children = get_child_pages(parent_id)
     
     for child in children:
+        print(f"Found page: {child['title']}")
         all_pages.append(child)
         # Recursively get children of this child with incremented depth
         get_all_nested_pages(child["id"], all_pages, max_depth, current_depth + 1)
@@ -72,15 +73,25 @@ def get_all_nested_pages(parent_id, all_pages=None, max_depth=MAX_NESTING_DEPTH,
 
 # Export each page to a file
 def export_pages(pages):
-    os.makedirs(EXPORT_DIR, exist_ok=True)
+    # Create export directory with space key subdirectory
+    space_export_dir = os.path.join(EXPORT_DIR, SPACE_KEY)
+    os.makedirs(space_export_dir, exist_ok=True)
     for page in pages:
-        title = page["title"].replace("/", "_").replace("\\", "_")
+        # Sanitize filename by replacing invalid characters
+        title = page["title"]
+        # Replace invalid Windows filename characters with underscores
+        invalid_chars = ['<', '>', ':', '"', '|', '?', '*', '/', '\\']
+        for char in invalid_chars:
+            title = title.replace(char, '_')
+        # Remove multiple consecutive underscores and trim
+        title = '_'.join(filter(None, title.split('_')))
+        
         html_content = page["body"]["storage"]["value"]
 
         # Convert HTML to Markdown using markdownify
         markdown_content = md(html_content)
 
-        filename = os.path.join(EXPORT_DIR, f"{title}.md")
+        filename = os.path.join(space_export_dir, f"{title}.md")
         with open(filename, "w", encoding="utf-8") as f:
             f.write(markdown_content)
         print(f"Exported: {title}")
