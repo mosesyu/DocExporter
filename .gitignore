@@ -1,0 +1,9 @@
+# Ignore confluence_exports and service_docs folders
+confluence_exports/
+service_docs/
+
+# Ignore temporary folders
+temp/
+
+# Ignore configuration files with potentially sensitive data
+config.json
